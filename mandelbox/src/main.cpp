@@ -27,7 +27,7 @@ int main(int argc, char ** argv)
 
     if(window==NULL)
     {
-        fprintf(stderr, "Failed to opne GLFW window\n");
+        fprintf(stderr, "Failed to open GLFW window\n");
         glfwTerminate();
         return -1;
     }
@@ -86,98 +86,123 @@ int main(int argc, char ** argv)
 
         vec3 light1 = vec3(-10.f, 0.0f,10.f);
 
+        vec4 boxFold(vec4 z)
+        {
+            float BOX_FOLD_LEN = 2.0f;
+            vec3 temp = z.xyz;
+            temp = BOX_FOLD_LEN * clamp(temp, -BOX_FOLD_LEN / 2.0f, BOX_FOLD_LEN / 2.0f) - temp;
+            return vec4(temp, z.w);
+        }
+
+
+        vec4 sphereFold(vec4 z)
+        {
+            float mR2 = 0.25f * cos(iTime) + 0.50f;
+            float fR2 = sin(iTime) + 2.00f;
+            vec3 temp = z.xyz;
+            vec4 ret = z * fR2 / clamp( dot(temp, temp), mR2, fR2);
+            return ret;
+        }
+
+        float mandelbox(in vec3 z, out vec4 color)
+        {
+            const int ITERATIONS = 10;
+            float MBSCALE = cos(0.05f * iTime) + -3.0f;
+
+        	float w2;
+        	vec4 w = vec4(z, 1.0);
+            vec4 w0 = w;
+
+        	color = w;
+
+            for(int i=0; i < ITERATIONS; i++)
+            {
+                w = boxFold(w);
+                w = sphereFold(w);
+                w = MBSCALE * w + w0;
+            	color = min(w, color);
+            	w2 = dot(w.xyz, w.xyz);
+            	if(w2 > 1000.0) break;
+            }
+            return 0.25f*sqrt(w2)/abs(w.w);
+        }
+
         float sdTorus( vec3 p, vec2 t )
         {
             vec2 q = vec2(length(p.xz)-t.x,p.y);
             return length(q)-t.y;
         }
 
-        float sdBox( vec3 p, vec3 b )
+        float map(in vec3 p, out vec4 color)
         {
-          vec3 d = abs(p) - b;
-          return min(max(d.x,max(d.y,d.z)),0.0f) + length(max(d,0.0f));
-        }
-
-        float plane( vec3 p, vec4 n )
-        {
-            return dot(p, n.xyz) - n.w;
-        }
-
-        float map(vec3 p)
-        {
-            vec3 c = vec3(30.0f, 30.0f, 30.f);
-            p = mod(p, c) - 0.5*c;
-            float d1 = sdBox(p, vec3(5.0f, 5.0f, 5.0f));
-            float d2 = sdTorus(p - vec3(0.0f, 5.0f, 0.0f), vec2(10.0f, 1.0f));
-            float d3 = sdTorus(p + vec3(0.0f, 5.0f, 0.0f), vec2(10.0f, 1.0f));
-            //float d4 = plane(p, vec4(0.0f, 1.0f, 0.0f, -15.0f));
-            return min(d1, min(d2, d3));//min(d3, d4)));
-
+            //vec3 c = vec3(6.0f, 6.0f, 6.0f);
+            //p = mod(p, c) - 0.5f * c;
+            return mandelbox(p, color);
         }
 
         vec4 color_ramp(int val, int max_val)
         {
-          int red;
-          int green;
-          int blue;
+            int red;
+            int green;
+            int blue;
 
-          int step = int(((float(val) * 1536.0f) / float(max_val)));
+            int step = int(((float(val) * 1536.0f) / float(max_val)));
 
-          if(step < 256)
-          {
-            red = 255;
-            green = step % 256;
-            blue = 0;
-          }
-          else if (step < 512)
-          {
-            red = 255 - (step % 256);
-            green = 255;
-            blue = 0;
-          }
-          else if (step < 768)
-          {
-            red = 0;
-            green = 255;
-            blue = step % 256;
-          }
-          else if (step < 1024)
-          {
-            red = 0;
-            green = 255 - (step % 256);
-            blue = 255;
-          }
-          else if (step < 1280)
-          {
-            red = step % 256;
-            green = 0;
-            blue = 255;
-          }
-          else
-          {
-            red = 255;
-            green = 0;
-            blue = 255 - (step % 256);
-          }
+            if(step < 256)
+            {
+                red = 255;
+                green = step % 256;
+                blue = 0;
+            }
+            else if (step < 512)
+            {
+                red = 255 - (step % 256);
+                green = 255;
+                blue = 0;
+            }
+            else if (step < 768)
+            {
+                red = 0;
+                green = 255;
+                blue = step % 256;
+            }
+            else if (step < 1024)
+            {
+                red = 0;
+                green = 255 - (step % 256);
+                blue = 255;
+            }
+            else if (step < 1280)
+            {
+                red = step % 256;
+                green = 0;
+                blue = 255;
+            }
+            else
+            {
+                red = 255;
+                green = 0;
+                blue = 255 - (step % 256);
+            }
 
-          return vec4(float(red)/255.0f, float(green)/255.0f, float(blue)/255.0f, 1.0f);
+            return vec4(float(red)/255.0f, float(green)/255.0f, float(blue)/255.0f, 1.0f);
 
         }
 
-        vec3 gradient(vec3 pos)
+        vec3 gradient(in vec3 pos)
         {
             const float deltaf = 0.0001f;
             vec3 ret;
             vec2 delta = vec2(deltaf, 0.0f);
-
-            ret.x = map(pos + delta.xyy) - map(pos - delta.xyy);
-            ret.y = map(pos + delta.yxy) - map(pos - delta.yxy);
-            ret.z = map(pos + delta.yyx) - map(pos - delta.yyx);
+            vec4 temp;
+            ret.x = map(pos + delta.xyy, temp) - map(pos - delta.xyy, temp);
+            ret.y = map(pos + delta.yxy, temp) - map(pos - delta.yxy, temp);
+            ret.z = map(pos + delta.yyx, temp) - map(pos - delta.yyx, temp);
 
             return normalize(ret);
         }
 
-        float raymarch(in vec3 orig, in vec3 dir, out vec3 pos, in float start,in float end, in int max_iter, out int n_iter)
+        float raymarch(in vec3 orig, in vec3 dir, out vec3 pos, out vec4 color, in float start,in float end, in int max_iter, out int n_iter)
         {
             float t=start;
             float dist;
@@ -185,12 +210,12 @@ int main(int argc, char ** argv)
 
             pos = orig;
 
-            for(step=1; step<max_iter; step++)
+            for(step=0; step<max_iter; step++)
             {
                 pos = orig + t*dir;
-                dist = map(pos);
+                dist = map(pos, color);
 
-                if(dist < 0.001f)
+                if(dist < 0.01f)
                 {
                     n_iter = step;
                     return t;
@@ -209,6 +234,7 @@ int main(int argc, char ** argv)
 
         vec4 render(mat4 cam, vec4 fragCoord)
         {
+            const int max_iter = 100;
             float fle = 1.0f;
             int n_iter = 0;
             vec2 screen_pos = (-iResolution + 2.0f * fragCoord.xy) / iResolution.y;
@@ -218,9 +244,10 @@ int main(int argc, char ** argv)
             vec3 pos;
             vec3 reflect;
             vec4 color;
+            vec4 trap;
             float dist;
 
-            dist = raymarch(orig, dir, pos, 0.0f, 100.0f, 100, n_iter);
+            dist = raymarch(orig, dir, pos, trap, 0.0f, 100.0f, max_iter, n_iter);
 
             if( dist < 0.0f )
             {
@@ -228,10 +255,11 @@ int main(int argc, char ** argv)
             }
             else
             {
-                color = vec4(0.0f, 0.75f, 1.0f, 1.0f);
-                normal = gradient(pos);
-
-                return vec4(dot(normalize(light1-pos), normal) * color.xyz, 1.0f);
+                return color_ramp(n_iter, max_iter);
+                //color = vec4(0.0f, 0.75f, 1.0f, 1.0f);
+                //normal = gradient(pos);
+                //color = vec4(dot(normalize(light1-pos), normal) * color.xyz, 1.0f);
+                //return color;
             }
         }
 
@@ -251,8 +279,9 @@ int main(int argc, char ** argv)
 
         void main()
         {
-            const int AA=2;
-            mat4 view = lookat( vec3( 20.0f*sin(iTime), 5.0f*sin(0.5f*iTime), 20.0f*cos(iTime) ),
+            const int AA=1;
+            const float dist = 5.0f;
+            mat4 view = lookat( vec3( dist * sin(iTime), dist * sin(0.1f * iTime), dist * cos(iTime)),
                                 vec3( 0.0f, 0.0f, 0.0f ),
                                 vec3( 0.0f, 1.0f, 0.0f ) );
 

@@ -3,6 +3,14 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 set(LINK_LIBS pthread X11 Xrandr Xxf86vm Xi GLU GL GLEW glfw)
 
+add_executable(mandelbox
+    mandelbox/src/main.cpp
+    )
+
+target_link_libraries(mandelbox
+    ${LINK_LIBS}
+    )
+
 add_executable(window
     window/src/main.cpp
     )
