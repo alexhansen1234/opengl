@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/window.dir/window/src/main.cpp.o  -o window -lpthread -lX11 -lXrandr -lXxf86vm -lXi -lGLU -lGL -lGLEW -lglfw 

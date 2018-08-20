@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/cube.dir/cube/src/main.cpp.o  -o cube -lpthread -lX11 -lXrandr -lXxf86vm -lXi -lGLU -lGL -lGLEW -lglfw 

@@ -1,5 +1,0 @@
-/home/alex/dev/opengl/build/CMakeFiles/edit_cache.dir
-/home/alex/dev/opengl/build/CMakeFiles/triangle.dir
-/home/alex/dev/opengl/build/CMakeFiles/rebuild_cache.dir
-/home/alex/dev/opengl/build/CMakeFiles/window.dir
-/home/alex/dev/opengl/build/CMakeFiles/cube.dir
