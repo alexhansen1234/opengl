@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/triangle.dir/triangle/src/main.cpp.o  -o triangle -lpthread -lX11 -lXrandr -lXxf86vm -lXi -lGLU -lGL -lGLEW -lglfw 

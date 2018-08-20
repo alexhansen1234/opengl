@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/alex/dev/opengl/triangle/src/main.cpp
+stdio.h
+-
+stdlib.h
+-
+GL/glew.h
+-
+GLFW/glfw3.h
+-
+
