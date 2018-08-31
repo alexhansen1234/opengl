@@ -6,8 +6,8 @@
 
 #define GLSL(src) "#version 330 core\n" #src
 
-#define HEIGHT 600.0f
-#define WIDTH  800.0f
+#define HEIGHT 750.0f
+#define WIDTH  1000.0f
 
 int main(int argc, char ** argv)
 {
@@ -82,7 +82,8 @@ int main(int argc, char ** argv)
 
         out vec4 outColor;
 
-        vec4 background_color = vec4(0.1f, 0.1f, 0.1f, 1.0f);
+        const vec4 background_color = vec4(255.0f/255.0f, 2.0f/255.0f, 229.0f/255.0f, 1.0f);
+        //const vec4 background_color = vec4(1.0f, 0.1f, 0.1f, 1.0f);
 
         vec3 light1 = vec3(-10.f, 0.0f,10.f);
 
@@ -98,7 +99,7 @@ int main(int argc, char ** argv)
         vec4 sphereFold(vec4 z)
         {
             float mR2 = 0.25f * cos(iTime) + 0.50f;
-            float fR2 = sin(iTime) + 2.00f;
+            float fR2 = cos(iTime) + 2.00f;
             vec3 temp = z.xyz;
             vec4 ret = z * fR2 / clamp( dot(temp, temp), mR2, fR2);
             return ret;
@@ -133,12 +134,26 @@ int main(int argc, char ** argv)
             return length(q)-t.y;
         }
 
+        float twist(in vec3 p, out vec4 color)
+        {
+            float c = cos(p.y * sin(0.1f * iTime));
+            float s = sin(p.y * sin(0.1f * iTime));
+            mat2  m = mat2(c,-s,s,c);
+            vec3  q = vec3(m*p.xz,p.y);
+            return mandelbox(q, color);
+        }
+
         float map(in vec3 p, out vec4 color)
         {
-            //vec3 c = vec3(6.0f, 6.0f, 6.0f);
-            //p = mod(p, c) - 0.5f * c;
             return mandelbox(p, color);
         }
+
+        // float map(in vec3 p, out vec4 color)
+        // {
+        //     vec3 c = vec3(10.0f, 10.0f, 10.0f);
+        //     p = mod(p, c) - 0.5f * c;
+        //     return mandelbox(p, color);
+        // }
 
         vec4 color_ramp(int val, int max_val)
         {
@@ -255,11 +270,11 @@ int main(int argc, char ** argv)
             }
             else
             {
-                return color_ramp(n_iter, max_iter);
-                //color = vec4(0.0f, 0.75f, 1.0f, 1.0f);
-                //normal = gradient(pos);
-                //color = vec4(dot(normalize(light1-pos), normal) * color.xyz, 1.0f);
-                //return color;
+            //    return color_ramp(n_iter, max_iter);
+                color = vec4(0.0f, 0.75f, 1.0f, 1.0f);
+                normal = gradient(pos);
+                color = vec4(dot(normalize(light1-pos), normal) * color.xyz, 1.0f);
+                return color;
             }
         }
 
@@ -279,9 +294,9 @@ int main(int argc, char ** argv)
 
         void main()
         {
-            const int AA=1;
+            const int AA=2;
             const float dist = 5.0f;
-            mat4 view = lookat( vec3( dist * sin(iTime), dist * sin(0.1f * iTime), dist * cos(iTime)),
+            mat4 view = lookat( vec3( dist * sin(iTime), dist / 2.0f * sin(0.1f * iTime), dist * cos(iTime)),
                                 vec3( 0.0f, 0.0f, 0.0f ),
                                 vec3( 0.0f, 1.0f, 0.0f ) );
 

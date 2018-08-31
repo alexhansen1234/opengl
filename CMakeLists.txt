@@ -3,11 +3,19 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 set(LINK_LIBS pthread X11 Xrandr Xxf86vm Xi GLU GL GLEW glfw)
 
-add_executable(mandelbox
-    mandelbox/src/main.cpp
+add_executable(mandelbox-fps
+    mandelbox-fps/src/main.cpp
     )
 
-target_link_libraries(mandelbox
+target_link_libraries(mandelbox-fps
+    ${LINK_LIBS}
+    )
+
+add_executable(mandelbox-rotation
+    mandelbox-rotation/src/main.cpp
+    )
+
+target_link_libraries(mandelbox-rotation
     ${LINK_LIBS}
     )
 
